@@ -143,32 +143,42 @@ progress_bar() {
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# Icons (minimal ASCII/Unicode)
+# ═══════════════════════════════════════════════════════════════════════════════
+ICO_MODEL="*"        # Model/AI
+ICO_DIR=">"          # Directory path
+ICO_GIT="^"          # Git branch
+ICO_CTX="~"          # Context remaining
+ICO_COST="$"         # Cost
+ICO_TOK="#"          # Tokens
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Render Statusline
 # ═══════════════════════════════════════════════════════════════════════════════
 sep() { printf '%s │%s ' "$(c $COL_SEP)" "$(rst)"; }
 
 # Model
-printf '%s%s%s%s' "$(bold)" "$(c $COL_MODEL)" "$model_name" "$(rst)"
+printf '%s%s%s %s%s' "$(bold)" "$(c $COL_MODEL)" "$ICO_MODEL" "$model_name" "$(rst)"
 
 # Directory
-printf '%s%s%s%s' "$(sep)" "$(c $COL_DIR)" "$current_dir" "$(rst)"
+printf '%s%s%s %s%s' "$(sep)" "$(c $COL_DIR)" "$ICO_DIR" "$current_dir" "$(rst)"
 
 # Git branch
 if [ -n "$git_branch" ]; then
-  printf '%s%s%s%s' "$(sep)" "$(c $COL_GIT)" "$git_branch" "$(rst)"
+  printf '%s%s%s %s%s' "$(sep)" "$(c $COL_GIT)" "$ICO_GIT" "$git_branch" "$(rst)"
 fi
 
 # Context remaining with mini progress bar
 if [ -n "$context_pct" ]; then
   remaining_num="${context_pct//%/}"
   bar=$(progress_bar "$remaining_num" 6)
-  printf '%s%s%s %s%s' "$(sep)" "$(c $context_col)" "$context_pct" "$bar" "$(rst)"
+  printf '%s%s%s %s %s%s' "$(sep)" "$(c $context_col)" "$ICO_CTX" "$context_pct" "$bar" "$(rst)"
 fi
 
 # Cost with burn rate
 if [ -n "$cost_usd" ]; then
-  cost_fmt=$(printf '$%.2f' "$cost_usd")
-  printf '%s%s%s%s' "$(sep)" "$(c $COL_COST)" "$cost_fmt" "$(rst)"
+  cost_fmt=$(printf '%.2f' "$cost_usd")
+  printf '%s%s%s%s%s' "$(sep)" "$(c $COL_COST)" "$ICO_COST" "$cost_fmt" "$(rst)"
   if [ -n "$cost_per_hour" ] && [ "$cost_per_hour" != "0.00" ]; then
     printf ' %s(%s$%s/h%s)%s' "$(dim)" "$(c $COL_RATE)" "$cost_per_hour" "$(rst)" "$(rst)"
   fi
@@ -177,7 +187,7 @@ fi
 # Token count
 if [ "$total_tokens" -gt 0 ]; then
   tok_fmt=$(format_tokens "$total_tokens")
-  printf '%s%s%s tok%s' "$(sep)" "$(c $COL_TOKENS)" "$tok_fmt" "$(rst)"
+  printf '%s%s%s %s%s' "$(sep)" "$(c $COL_TOKENS)" "$ICO_TOK" "$tok_fmt" "$(rst)"
 fi
 
 printf '\n'
