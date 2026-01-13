@@ -32,6 +32,7 @@ COL_COST="214"       # Orange gold
 COL_TOKENS="147"     # Light purple
 COL_SEP="240"        # Dim gray for separators
 COL_RATE="220"       # Yellow for burn rate
+COL_SPIN="51"        # Cyan for spinner
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # JSON Extraction Functions
@@ -117,6 +118,9 @@ in_tok=$(get_num '.context_window.total_input_tokens' '0')
 out_tok=$(get_num '.context_window.total_output_tokens' '0')
 total_tokens=$((in_tok + out_tok))
 
+# Working status
+is_streaming=$(get_val '.is_streaming' 'false')
+
 # Format token count (K for thousands)
 format_tokens() {
   local t="$1"
@@ -127,6 +131,17 @@ format_tokens() {
   else
     echo "$t"
   fi
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Spinner Animation
+# ═══════════════════════════════════════════════════════════════════════════════
+SPINNER_FRAMES=('|' '/' '-' '\')
+spinner() {
+  # Use current time (deciseconds) to cycle through frames
+  local ms=$(($(date +%s%N 2>/dev/null || echo "$(date +%s)000000000") / 100000000))
+  local idx=$((ms % 4))
+  echo "${SPINNER_FRAMES[$idx]}"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -157,8 +172,12 @@ ICO_TOK="#"          # Tokens
 # ═══════════════════════════════════════════════════════════════════════════════
 sep() { printf '%s │%s ' "$(c $COL_SEP)" "$(rst)"; }
 
-# Model
-printf '%s%s%s %s%s' "$(bold)" "$(c $COL_MODEL)" "$ICO_MODEL" "$model_name" "$(rst)"
+# Spinner (when working) or Model icon
+if [ "$is_streaming" = "true" ]; then
+  printf '%s%s%s %s%s' "$(bold)" "$(c $COL_SPIN)" "$(spinner)" "$model_name" "$(rst)"
+else
+  printf '%s%s%s %s%s' "$(bold)" "$(c $COL_MODEL)" "$ICO_MODEL" "$model_name" "$(rst)"
+fi
 
 # Directory
 printf '%s%s%s %s%s' "$(sep)" "$(c $COL_DIR)" "$ICO_DIR" "$current_dir" "$(rst)"
